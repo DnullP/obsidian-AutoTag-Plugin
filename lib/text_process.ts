@@ -9,7 +9,8 @@ async function processAllFiles(plugin: Plugin) {
             console.log("info: processing")
             const content = await plugin.app.vault.read(file);
             let modifiedContent = await deleteTags(content)
-            let newModifiedContent = await addFrontMatter(modifiedContent, "tags", await generateMainTag(file))
+            let mainTags = await generateMainTag(file)
+            let newModifiedContent = await addFrontMatter(modifiedContent, "tags", `[${mainTags.join(",")}]`)
             plugin.app.vault.modify(file, newModifiedContent)
             console.log("info: finished tagging")
         }
@@ -29,7 +30,6 @@ async function processAllFiles(plugin: Plugin) {
         content = addSecondTags(content, secondTags)
         plugin.app.vault.modify(file, content)
     })
-
 }
 
 function addSecondTags(content: string, secondTags: string[]): string {
@@ -38,11 +38,13 @@ function addSecondTags(content: string, secondTags: string[]): string {
 }
 
 function getSecondTag(refLinks: Record<string, number>): string[] {
-    let secondTags: string[] = []
-    Object.keys(refLinks).forEach(function (pathToRef) {
-        secondTags.push(pathToRef.split('/').at(-2) ?? "ERROR_TAG")
-    })
-    return secondTags
+    let secondTags: Set<string> = new Set();
+
+    Object.keys(refLinks).forEach((pathToRef) => {
+        pathToRef.split("/").slice(0, -1).forEach((tag) => secondTags.add(tag));
+    });
+
+    return Array.from(secondTags)
 }
 
 async function addFrontMatter(content: string, key: string, value: string): Promise<string> {
@@ -87,9 +89,9 @@ async function deleteTags(content: string): Promise<string> {
     return content.replace(/#\S+/g, '').replace(/(tags:[^\n]*)(\n\s+-[^\n]*)+/g, '$1')
 }
 
-async function generateMainTag(file: TFile): Promise<string> {
-    let mainTag: string | undefined = file.path.split('/').at(-2)
-    return mainTag ?? "unknown"
+async function generateMainTag(file: TFile): Promise<string[]> {
+    let mainTag: string[] | undefined = file.path.split('/').slice(0, -1)
+    return mainTag ?? []
 }
 
 export { processAllFiles }
