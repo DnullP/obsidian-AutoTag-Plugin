@@ -1,96 +1,41 @@
-# Obsidian Sample Plugin
+# Obsidian-AutoTag-Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+**此插件可能会破坏你现有的Tag体系, 请务必备份Vault后再使用!**
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+**此插件可能会破坏你现有的Tag体系, 请务必备份Vault后再使用!**
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+**此插件可能会破坏你现有的Tag体系, 请务必备份Vault后再使用!**
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+---
 
-## First time developing plugins?
+## introduction
 
-Quick starting guide for new plugin devs:
+这个插件会根据仓库的**目录分类**和**文章链接**, 自动构建一个Tag体系, 在修改文章位置和引用时自动更新Tag. 
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+## 设计思路
 
-## Releasing new releases
+### 目录管理方式
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+常规情况下, 我们通过目录分类的方式来管理笔记, 一篇笔记会拥有一个唯一的路径来作为其分类.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+但是当我们的笔记数量和相关领域增多时, 单一的分类会不够用, 比如以下情况:
+> 我写了一篇关于 *如何使用redis搭建旁路cache系统的文章* , 但是我关于redis的笔记在一个目录下, 关于通用cache的笔记在另一个目录下, 同时这还是一篇实践相关的笔记, 我希望将其也加入practice的分类. 文件不可能同时位于三个目录之下.
 
-## Adding your plugin to the community plugin list
+### 标签管理方式
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+这时我们需要一种更加灵活的类型系统. 我们可以通过给一篇文章加上三个标签来表示其同时属于三个分类.
 
-## How to use
+### 两种方案的联系
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+目录管理模式遵循的是路径即类型, 比如`computer-science\network\IP\IP Datagarm.md`就通过目录的形式给了`IP Datagarm`这个词条三个类型(`computer-science`,`network`,`IP`)
 
-## Manually installing the plugin
+而Tag不依赖于路径, 这里我令其依赖于对其他文章的**引用**. 一般来说, 如果我们在文章中引用了另一个词条, 那么大概率其中的主题会和这个词条相关.
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+## 标签规则
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+每篇文章会有两种tag: `mainTag`和`secondTag`
 
-## Funding URL
+`mainTag`是根据文章本身的目录推导而来的, 将各级目录作为Tag的值
 
-You can include funding URLs where people who use your plugin can financially support it.
+`secondTag`根据引用的文章建立, 插件将读取所有链接的文章的`mainTag`并作为这篇文章的`secondTag`.
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
