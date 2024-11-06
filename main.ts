@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class HelloWorldPlugin extends Plugin {
+export default class AutoTagPlugin extends Plugin {
 	settings: MyPluginSettings;
 
 	async onload() {
@@ -66,9 +66,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: AutoTagPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: AutoTagPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
