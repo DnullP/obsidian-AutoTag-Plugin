@@ -18,7 +18,7 @@ class TextProcesser {
     }
 
     removeSecondTags(content: string): string {
-        return content.replace(/(?<=---\n)\s*(?:#[^#\s]+[\s]*)+\n?/g, '').trim();
+        return content.replace(/(?<=---\n)\s*(?:#[^#\s]+[\s]*)+\n?/g, '');
     }
 
     async addFrontMatter(content: string, key: string, value: string): Promise<string> {
