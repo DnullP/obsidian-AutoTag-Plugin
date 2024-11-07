@@ -18,7 +18,7 @@ class TextProcesser {
     }
 
     removeSecondTags(content: string): string {
-        return content.replace(/(?<=---\n)(?:#\S+\s*)+/g, '').trim();
+        return content.replace(/(?<=---\n)\s*(?:#[^#\s]+[\s]*)+\n?/g, '').trim();
     }
 
     async addFrontMatter(content: string, key: string, value: string): Promise<string> {
@@ -26,7 +26,7 @@ class TextProcesser {
             return content
         }
 
-        const frontMatterRegex = /^---\n([\s\S]*?)\n---\n/;
+        const frontMatterRegex = /^---\n([\s\S]*?)\n---\n?/;
 
         let newContent: string;
 
