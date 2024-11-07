@@ -42,7 +42,9 @@ async function onFileMoved(plugin: Plugin, file: TFile, oldPath: string) {
         }
         updateMainTag(plugin, file)
         //getBacklinksForFile is a undocumented function
+        // @ts-ignore
         let backlinks = plugin.app.metadataCache.getBacklinksForFile(file)["data"]
+        // @ts-ignore
         backlinks.forEach(async (key, filepath) => {
             let file = plugin.app.vault.getFileByPath(filepath)
             if (file == undefined) {

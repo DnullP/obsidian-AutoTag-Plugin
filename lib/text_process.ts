@@ -32,6 +32,7 @@ class TextProcesser {
 
         if (frontMatterRegex.test(content)) {
             // 已有front-matter，直接更新内容
+            // @ts-ignore
             const existingFrontMatter = content.match(frontMatterRegex)[1];
 
             const updatedFrontMatter = await this.updateFrontMatter(existingFrontMatter, key, value);
