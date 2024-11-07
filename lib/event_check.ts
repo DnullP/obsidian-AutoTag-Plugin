@@ -28,6 +28,10 @@ async function processAllFiles(plugin: Plugin) {
         }
         let content = await plugin.app.vault.read(file)
         content = textProcesser.removeSecondTags(content)
+        if (secondTags.length == 0) {
+            await plugin.app.vault.modify(file, content)
+            return
+        }
         content = textProcesser.addSecondTags(content, secondTags)
         plugin.app.vault.modify(file, content)
     })
