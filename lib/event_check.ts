@@ -11,7 +11,7 @@ async function processAllFiles(plugin: Plugin) {
 
         if (metadata && metadata.frontmatter) {
             console.log("info: processing")
-            updateMainTag(plugin, file)
+            await updateMainTag(plugin, file)
             console.log("info: finished tagging")
         }
     }
@@ -27,6 +27,7 @@ async function processAllFiles(plugin: Plugin) {
             return
         }
         let content = await plugin.app.vault.read(file)
+        content = textProcesser.removeSecondTags(content)
         content = textProcesser.addSecondTags(content, secondTags)
         plugin.app.vault.modify(file, content)
     })

@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class AutoTagPlugin extends Plugin {
 	settings: MyPluginSettings;
-	inModifing: boolean = false;
+	inModifing: boolean = false; // This is used to avoid recursive triggering the event
 
 	async onload() {
 		await this.loadSettings();
@@ -26,14 +26,25 @@ export default class AutoTagPlugin extends Plugin {
 
 		this.addRibbonIcon('dice', 'Greet', () => {
 			console.log('Loading plugin...');
-			this.app.workspace.onLayoutReady(() => {
-				process.processAllFiles(this);
+			this.app.workspace.onLayoutReady(async () => {
+				if (this.inModifing == true) {
+					return
+				}
+				this.inModifing = true
+				await process.processAllFiles(this);
+				this.inModifing = false
+				return
 			});
 		});
 
 		this.registerEvent(this.app.vault.on('rename', (file: TFile, oldPath: string) => {
+			if (this.inModifing == true) {
+				return
+			}
+			this.inModifing = true
 			process.onFileMoved(this, file, oldPath)
-
+			this.inModifing = false
+			return
 		}))
 		this.registerEvent(
 			this.app.vault.on('modify', async (file: TFile) => {
