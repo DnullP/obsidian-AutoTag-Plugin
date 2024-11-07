@@ -11,7 +11,7 @@ class TextProcesser {
         let secondTags: Set<string> = new Set();
 
         Object.keys(refLinks).forEach((pathToRef) => {
-            pathToRef.split("/").slice(0, -1).forEach((tag) => secondTags.add(tag));
+            pathToRef.replace(" ", "-").split("/").slice(0, -1).forEach((tag) => secondTags.add(tag));
         });
 
         return Array.from(secondTags)
@@ -64,7 +64,7 @@ class TextProcesser {
     }
 
     async generateMainTag(file: TFile): Promise<string[]> {
-        let mainTag: string[] | undefined = file.path.split('/').slice(0, -1)
+        let mainTag: string[] | undefined = file.path.replace(" ", "-").split('/').slice(0, -1)
         return mainTag ?? []
     }
 }
