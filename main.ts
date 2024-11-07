@@ -1,7 +1,7 @@
 import { promises } from 'dns';
 import { read } from 'fs';
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { processAllFiles } from 'lib/text_process';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, CachedMetadata } from 'obsidian';
+import * as process from 'lib/event_check';
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class AutoTagPlugin extends Plugin {
 	settings: MyPluginSettings;
+	inModifing: boolean = false;
 
 	async onload() {
 		await this.loadSettings();
@@ -26,11 +27,28 @@ export default class AutoTagPlugin extends Plugin {
 		this.addRibbonIcon('dice', 'Greet', () => {
 			console.log('Loading plugin...');
 			this.app.workspace.onLayoutReady(() => {
-				processAllFiles(this);
+				process.processAllFiles(this);
 			});
 		});
 
+		this.registerEvent(this.app.vault.on('rename', (file: TFile, oldPath: string) => {
+			process.onFileMoved(this, file, oldPath)
+
+		}))
+		this.registerEvent(
+			this.app.vault.on('modify', async (file: TFile) => {
+				if (this.inModifing == true) {
+					return
+				}
+				this.inModifing = true
+				await process.onMetadataChanged(this, file);
+				this.inModifing = false
+				return
+			})
+		);
+
 	}
+
 
 	onunload() {
 		console.log("onunload")
