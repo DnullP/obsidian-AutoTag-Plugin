@@ -67,7 +67,12 @@ async function onMetadataChanged(plugin: Plugin, file: TFile) {
 
         let content = await plugin.app.vault.read(file)
         content = textProcesser.removeSecondTags(content)
-        content = await textProcesser.addSecondTags(content, textProcesser.getSecondTag(metadata[file.path]))
+        let secondTags = textProcesser.getSecondTag(metadata[file.path])
+        if (secondTags.length == 0) {
+            await plugin.app.vault.modify(file, content)
+            return
+        }
+        content = await textProcesser.addSecondTags(content, secondTags)
         console.log(content)
         await plugin.app.vault.modify(file, content)
 
